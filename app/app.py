@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
+import json
 import os
 import pymongo
 from bson import ObjectId
@@ -58,6 +59,11 @@ def view(file_id):
     return render_template('log/view.html',
             reports=reports,
             logfile=logfile)
+
+@app.route('/reports/<file_id>/<report_type>', methods=['GET'])
+def load_report(file_id, report_type):
+    print str(file_id) + "_" + "durationplot"
+    return json.dumps(filedb.reports.find_one({"_id":str(file_id) + "_" + "durationplot"}))
 
 @app.route('/files/<file_id>/register/<report_type>', methods=['POST'])
 def register_report(file_id, report_type):
