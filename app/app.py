@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import json
 import os
 import pymongo
@@ -15,6 +15,15 @@ from celery_conf import celery
 from report_tasks import run_report
 
 REPORT_TYPES = [('Duration', 'durationplot')]
+
+
+def request_wants_json():
+    best = request.accept_mimetypes \
+        .best_match(['application/json', 'text/html'])
+    return best == 'application/json' and \
+        request.accept_mimetypes[best] > \
+        request.accept_mimetypes['text/html']
+
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
@@ -58,6 +67,8 @@ def view(file_id):
     for report_type, task_id in file_obj.get('reports', {}).items():
         task = celery.AsyncResult(task_id)
         reports[report_type] = task.state
+    if request_wants_json():
+        return jsonify(reports)
     return render_template('log/view.html',
             report_types=REPORT_TYPES,
             reports=reports,

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class='row-fluid'>
-    <h1 class='span8'>File {{file_obj._id}}</h1>
+    <h1 class='span8' data-file-id="{{file_obj._id}}">File {{file_obj._id}}</h1>
     <div class='pull-right'>
         <div class='btn-group'>
             <button class='btn dropdown-toggle' data-toggle='dropdown'>
@@ -21,9 +21,14 @@
     </div>
 </div>
 <div class='row-fluid'>
-    <div class='well well-small'>
+    <div id='report-block' class='well well-small'>
         {% for type, state in reports.items() %}
-            <div><strong>Type: </strong>{{type}} <span class='label'>{{state}}</span></div>
+            <div>
+                <strong>Type: </strong>{{type}} <span class='label'>{{state}}</span>
+                {% if state == "SUCCESS" %}
+                    <a href='{{url_for('load_report', file_id=file_obj._id, report_type=type)}}'>See report</a>
+                {% endif %}
+            </div>
         {% endfor %}
     </div>
 </div>
@@ -33,11 +38,28 @@
 {% block morescripts %}
 <script type='text/javascript'>
     $(function(){
+        var fileId = $("h1").data('file-id');
         $(".remote").on('click', function(event){
             event.preventDefault();
             var $this = $(this);
             $.post($this.data('href'));
         });
+        window.setInterval(function(){
+            $.getJSON("{{url_for('view', file_id=file_obj._id)}}", function(data){
+                console.log(data)
+                var $reportBlock = $('#report-block');
+                $reportBlock.empty();
+                $.each(data,function(k, v){
+                    var $strong = $("<strong />").text('Type: ');
+                    var $span = $("<span class='label' />").text(v);
+                    var $div = $("<div />").append($strong).append(k).append(' ').append($span)
+                    if(v === "SUCCESS"){
+                        $div.append(' ').append($("<a href='/reports/" + fileId  + "/" + k + "' />").text("See report"));
+                    }
+                    $reportBlock.append($div)
+                });
+            });
+        }, 500);
     });
 </script>
 {% endblock %}
