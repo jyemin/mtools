@@ -13,35 +13,41 @@
         <script>
 $(function() {
 /*
-    var json = {
-        "ns1" : [
-            [(new Date("Fri Jul 12 2013 11:31:36 GMT-0400 (EDT)")).getTime(), 1245, "q"],
-            [(new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)")).getTime(), 12426, "q"],
-            [(new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)")).getTime(), 56, "i"],
-        ],
-        "ns2" : [
-            [(new Date("Fri Jul 12 2013 11:31:36 GMT-0400 (EDT)").getTime()), 1245, "u"],
-            [(new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)").getTime()), 12426, "i"],
-            [(new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)").getTime()), 56, "q"],
-        ]
-    };
+    var json = [
+        {
+            groupkey: "ns1",
+            points: [
+                [ (new Date("Fri Jul 12 2013 11:31:36 GMT-0400 (EDT)")).getTime(), 1245, "q" ],
+                [ (new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)")).getTime(), 12426, "q" ],
+                [ (new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)")).getTime(), 56, "i" ]
+            ]
+        },
+        {
+            groupkey: "ns2",
+            points: [
+                [ (new Date("Fri Jul 12 2013 11:31:36 GMT-0400 (EDT)").getTime()), 1245, "u" ],
+                [ (new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)").getTime()), 12426, "i" ],
+                [ (new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)").getTime()), 56, "q" ]
+            ]
+        }
+    ];
 */
     var requestData = function() {
         $.ajax({
             url: 'http://localhost:5000/path/to/json',
-            success: function(json) {
-                for (ns in json) {
+            success: function(groups) {
+                for (var i = 0; i < groups.length; i++) {
                     var series = chart.addSeries({
-                        name: ns,
+                        name: groups[i].groupkey,
                         color: generateColor(),
                         data: []
                     });
 
-                    for (var i = 0; i < json[ns].length; i++) {
+                    for (var j = 0; j < groups[i].points.length; j++) {
                         series.addPoint({
-                            x: json[ns][i][0],
-                            y: json[ns][i][1],
-                            op: json[ns][i][2]
+                            x: groups[i].points[j][0],
+                            y: groups[i].points[j][1],
+                            op: groups[i].points[j][2]
                         });
                     }
                 }
