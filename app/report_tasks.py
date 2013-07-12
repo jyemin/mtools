@@ -1,8 +1,4 @@
-from celery import Celery
-from report_generators import generate_plot_report
-
-celery = Celery('reports', broker='mongodb://localhost:27017/report_tasks')
-
+from celery_conf import celery
 
 @celery.task
 def run_report(file_id, report_type):

@@ -3,5 +3,8 @@
 <h1>File {{logfile.filename}}</h1>
 <div class='row-fluid'>
     MAYBE YOU WANT TO RUN REPORTS ON THIS FILE, BUT TOO BAD!  YOU CANNOT.
+    {% for report in reports %}
+        <div>{{report}}</div>
+    {% endfor %}
 </div>
 {% endblock %}

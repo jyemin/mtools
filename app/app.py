@@ -3,11 +3,14 @@ import os
 import pymongo
 from bson import ObjectId
 from mtools.util.logline import LogLine
+
 app = Flask(__name__)
 
 conn = pymongo.Connection()
+filedb = conn.files
 storage_dir = "/tmp/mtools_storage"
 
+from celery_conf import celery
 from report_tasks import run_report
 
 @app.route("/", methods=['GET', 'POST'])
@@ -18,6 +21,7 @@ def home():
         logfile = request.files['logfile']
         if logfile:
             filename = ObjectId()
+            filedb.files.insert({'_id': filename, 'reports': {}})
             logfile.save(os.path.join(storage_dir, str(filename)))
             return redirect(url_for('view', file_id=filename))
         else:
@@ -46,14 +50,23 @@ def index():
 def view(file_id):
     filepath = os.path.join(storage_dir, str(file_id))
     logfile = open(filepath, 'r')
+    file_obj = filedb.files.find_one({'_id': ObjectId(file_id)})
+    reports = {}
+    for report_type, task_id in file_obj.get('reports', {}):
+        task = celery.AsyncResult(task_id)
+        reports[report_type] = task.state
     return render_template('log/view.html',
-            reports=[],
+            reports=reports,
             logfile=logfile)
 
 @app.route('/files/<file_id>/register/<report_type>', methods=['POST'])
 def register_report(file_id, report_type):
-    run_report.delay(file_id, report_type)
-    return ""
+    app.logger.info("report type {0}".format(report_type))
+    result = run_report.apply_async((file_id, report_type), countdown=10)
+
+    filedb.files.update({'_id': ObjectId(file_id)},
+            {'$set': {'reports.{0}'.format(report_type): result.id}})
+    return result.id
 
 if __name__ == "__main__":
     app.run(debug=True)
