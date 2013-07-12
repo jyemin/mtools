@@ -1,4 +1,5 @@
 from celery_conf import celery
+from report_generators import generate_plot_report
 
 @celery.task
 def run_report(file_id, report_type):

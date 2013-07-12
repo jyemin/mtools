@@ -52,7 +52,7 @@ def view(file_id):
     logfile = open(filepath, 'r')
     file_obj = filedb.files.find_one({'_id': ObjectId(file_id)})
     reports = {}
-    for report_type, task_id in file_obj.get('reports', {}):
+    for report_type, task_id in file_obj.get('reports', {}).items():
         task = celery.AsyncResult(task_id)
         reports[report_type] = task.state
     return render_template('log/view.html',
@@ -62,7 +62,7 @@ def view(file_id):
 @app.route('/files/<file_id>/register/<report_type>', methods=['POST'])
 def register_report(file_id, report_type):
     app.logger.info("report type {0}".format(report_type))
-    result = run_report.apply_async((file_id, report_type), countdown=10)
+    result = run_report.apply_async((file_id, report_type))
 
     filedb.files.update({'_id': ObjectId(file_id)},
             {'$set': {'reports.{0}'.format(report_type): result.id}})
