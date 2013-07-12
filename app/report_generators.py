@@ -8,17 +8,14 @@ from collections import OrderedDict
 
 db = MongoClient().files
 
-
-
 storage_dir = "/tmp/mtools_storage" #TODO import this from app config
-
 
 def extract_plotpoints(line):
     """ given a (parsed) log line, return an object
     that contains data we want to plot
     """
-    #return time.mktime(line.datetime.timetuple()), line.duration, line.operation
-    return time.mktime(datetime.now().timetuple()), line.duration, line.operation
+    return time.mktime(line.datetime.timetuple()), line.duration, line.operation
+    #return time.mktime(datetime.now().timetuple()), line.duration, line.operation
 
 def generate_plot_report(file_id, task_id):
     groupkey = "namespace" #operation
@@ -28,26 +25,26 @@ def generate_plot_report(file_id, task_id):
     names_keyspaces = {}
     keyspaces = []
     report = {'groups':keyspaces} # [{namespace:'ns1',points:[]}
+    groups = report['groups']
 
     i = 0
     for ll in logfile:
         i+= 1
         line = LogLine(ll)
         if plotter.accept_line(line):
+            if not line.datetime:
+                print "NO DATE", line
             plotpoint = extract_plotpoints(line)
             group_val = getattr(line, groupkey)
             
             group_index = names_keyspaces.get(group_val,None)
             if not group_index:
-                keyspaces.append(group_val)
-                names_keyspaces[group_val] = len(keyspaces)
-                group_index = len(keyspaces)
-                report['groups'].append({'groupkey':group_val,'points':[]})
+                names_keyspaces[group_val] = len(groups)
+                groups.append({'groupkey':group_val,'points':[]})
+                group_index = len(groups)-1
 
-            report['groups'][group_index]['points'].append(plotpoint)
+            groups[group_index]['points'].append(plotpoint)
 
     report['_id'] = str(file_id) + "_" + "durationplot"
     db.reports.update({"_id":report['_id']}, report, upsert=True)
-    #print i, "lines processed"
-
     

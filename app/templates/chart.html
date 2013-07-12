@@ -33,10 +33,11 @@ $(function() {
     ];
 */
     var requestData = function() {
-        $.ajax({
-            url: 'http://localhost:5000/path/to/json',
-            success: function(groups) {
-                for (var i = 0; i < groups.length; i++) {
+      $.getJSON('{{url_for('report_data',file_id=file_id, report_type=report_type)}}',
+            function(report) {
+                groups = report.groups
+                console.log(groups)
+                for (var i = 2; i < groups.length; i++) {
                     var series = chart.addSeries({
                         name: groups[i].groupkey,
                         color: generateColor(),
@@ -51,9 +52,8 @@ $(function() {
                         });
                     }
                 }
-            },
-            cache: false
-        });
+            }
+        );
     };
 
     var ops = {
