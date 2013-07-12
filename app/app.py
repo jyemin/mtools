@@ -14,6 +14,8 @@ storage_dir = "/tmp/mtools_storage"
 from celery_conf import celery
 from report_tasks import run_report
 
+REPORT_TYPES = [('Duration', 'durationplot')]
+
 @app.route("/", methods=['GET', 'POST'])
 def home():
     if request.method == 'GET':
@@ -57,8 +59,10 @@ def view(file_id):
         task = celery.AsyncResult(task_id)
         reports[report_type] = task.state
     return render_template('log/view.html',
+            report_types=REPORT_TYPES,
             reports=reports,
-            logfile=logfile)
+            logfile=logfile,
+            file_obj=file_obj)
 
 @app.route('/reports/<file_id>/<report_type>', methods=['GET'])
 def load_report(file_id, report_type):
