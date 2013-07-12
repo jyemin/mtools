@@ -1,0 +1,176 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>mplotqueries</title>
+    </head>
+    <body>
+        <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/highcharts/3.0.2/highcharts.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
+        <script>
+$(function() {
+/*
+    var json = {
+        "ns1" : [
+            [(new Date("Fri Jul 12 2013 11:31:36 GMT-0400 (EDT)")).getTime(), 1245, "q"],
+            [(new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)")).getTime(), 12426, "q"],
+            [(new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)")).getTime(), 56, "i"],
+        ],
+        "ns2" : [
+            [(new Date("Fri Jul 12 2013 11:31:36 GMT-0400 (EDT)").getTime()), 1245, "u"],
+            [(new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)").getTime()), 12426, "i"],
+            [(new Date("Fri Jul 12 2013 11:32:36 GMT-0400 (EDT)").getTime()), 56, "q"],
+        ]
+    };
+*/
+    var requestData = function() {
+        $.ajax({
+            url: 'http://localhost:5000/path/to/json',
+            success: function(json) {
+                for (ns in json) {
+                    var series = chart.addSeries({
+                        name: ns,
+                        color: generateColor(),
+                        data: []
+                    });
+
+                    for (var i = 0; i < json[ns].length; i++) {
+                        series.addPoint({
+                            x: json[ns][i][0],
+                            y: json[ns][i][1],
+                            op: json[ns][i][2]
+                        });
+                    }
+                }
+            },
+            cache: false
+        });
+    };
+
+    var ops = {
+        i: "insert",
+        q: "query",
+        u: 'update'
+    }
+
+    // See: http://stackoverflow.com/a/4382138/162228
+    var colors = [
+        '#FFB300', //Vivid Yellow
+        '#803E75', //Strong Purple
+        '#FF6800', //Vivid Orange
+        '#A6BDD7', //Very Light Blue
+        '#C10020', //Vivid Red
+        '#CEA262', //Grayish Yellow
+        '#817066', //Medium Gray
+
+        // The following will not be good for people with defective color vision
+        '#007D34', //Vivid Green
+        '#F6768E', //Strong Purplish Pink
+        '#00538A', //Strong Blue
+        '#FF7A5C', //Strong Yellowish Pink
+        '#53377A', //Strong Violet
+        '#FF8E00', //Vivid Orange Yellow
+        '#B32851', //Strong Purplish Red
+        '#F4C800', //Vivid Greenish Yellow
+        '#7F180D', //Strong Reddish Brown
+        '#93AA00', //Vivid Yellowish Green
+        '#593315', //Deep Yellowish Brown
+        '#F13A13', //Vivid Reddish Orange
+        '#232C16', //Dark Olive Green
+
+        '#0000FF', //Blue
+        '#FF0000', //Red
+        '#00FF00', //Green
+        '#FFFF00', //Yellow
+        '#FF00FF', //Magenta
+        '#FF8080', //Pink
+        '#080808', //Grey
+        '#080000', //Brown
+        '#FF0800', //Orange
+    ];
+
+    var lastColor = colors.length;
+
+    var generateColor = function() {
+        return colors[lastColor++ % colors.length];
+    }
+
+    var tooltipFormatter = function() {
+        var date = moment(this.x).format('ddd MMM D HH:mm:ss' + (this.x % 1000 != 0 ? '.SSS' : ''));
+        var name = '<span style="color:' + this.series.color + '">' + this.series.name + '</span>';
+        var op = ops[this.point.op] || 'op';
+        return date + '<br/>' + name + ' ' + op + ': ' + this.y + 'ms';
+     };
+
+    var config = {
+        chart: {
+            renderTo: 'container',
+            type: 'scatter',
+            zoomType: 'xy',
+            events: {
+                load: requestData
+            }
+        },
+        title: {
+            text: 'Query Durations'
+        },
+        xAxis: {
+            title: {
+                text: 'Time'
+            },
+            startOnTick: true,
+            endOnTick: true,
+            showLastLabel: true,
+            type: 'datetime'
+        },
+        yAxis: {
+            title: {
+                text: 'Duration (ms)'
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            verticalAlign: 'top',
+            x: 100,
+            y: 70,
+            floating: true,
+            backgroundColor: '#FFFFFF',
+            borderWidth: 1
+        },
+        tooltip: {
+            formatter: tooltipFormatter
+        },
+        plotOptions: {
+            scatter: {
+                marker: {
+                    radius: 5,
+                    states: {
+                        hover: {
+                            enabled: true,
+                            lineColor: 'rgb(100,100,100)'
+                        }
+                    }
+                },
+                states: {
+                    hover: {
+                        marker: {
+                            enabled: false
+                        }
+                    }
+                }
+            }
+        },
+        series: []
+    };
+
+    Highcharts.setOptions({ global: { useUTC: false }});
+
+    var chart = new Highcharts.Chart(config);
+});
+        </script>
+    </body>
+</html>
