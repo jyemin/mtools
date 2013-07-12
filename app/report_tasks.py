@@ -8,4 +8,3 @@ def run_report(file_id, report_type, task_id=None):
 
 
 
-    #print 'report: {0}'.format(report_type)

@@ -1,10 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>File {{logfile.filename}}</h1>
 <div class='row-fluid'>
-    MAYBE YOU WANT TO RUN REPORTS ON THIS FILE, BUT TOO BAD!  YOU CANNOT.
-    {% for report in reports %}
-        <div>{{report}}</div>
-    {% endfor %}
+    <h1 class='span8'>File {{file_obj._id}}</h1>
+    <div class='pull-right'>
+        <div class='btn-group'>
+            <button class='btn dropdown-toggle' data-toggle='dropdown'>
+                Schedule
+                <span class='caret'></span>
+            </button>
+            <ul class='dropdown-menu'>
+            {% for report_type in report_types %}
+                <li>
+                    <a href='#' class='remote' data-href='/files/{{file_obj._id}}/register/{{report_type[1]}}'>
+                        {{report_type[0]}}
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
 </div>
+<div class='row-fluid'>
+    <div class='well well-small'>
+        {% for type, state in reports.items() %}
+            <div><strong>Type: </strong>{{type}} <span class='label'>{{state}}</span></div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block morescripts %}
+<script type='text/javascript'>
+    $(function(){
+        $(".remote").on('click', function(event){
+            event.preventDefault();
+            var $this = $(this);
+            $.post($this.data('href'));
+        });
+    });
+</script>
 {% endblock %}
