@@ -25,8 +25,7 @@ def home():
 
 @app.route("/plot_queries/<file_id>", methods=['GET'])
 def plot_queries(file_id):
-    gfs = gridfs.GridFS(filedb)
-    logfile = gfs.get(ObjectId(file_id))
+    logfile = open(os.path.join(storage_dir, str(file_id)))
     i = 0
     while True:
         i += 1
