@@ -64,10 +64,15 @@ def view(file_id):
             logfile=logfile,
             file_obj=file_obj)
 
+@app.route('/reports_json/<file_id>/<report_type>', methods=['GET'])
+def report_data(file_id, report_type):
+    return json.dumps(filedb.reports.find_one({"_id":str(file_id) + "_" + "durationplot"}))
+
 @app.route('/reports/<file_id>/<report_type>', methods=['GET'])
 def load_report(file_id, report_type):
-    print str(file_id) + "_" + "durationplot"
-    return json.dumps(filedb.reports.find_one({"_id":str(file_id) + "_" + "durationplot"}))
+    return render_template("chart.html", file_id=file_id, report_type=report_type)
+    #return json.dumps(filedb.reports.find_one({"_id":str(file_id) + "_" + "durationplot"}))
+
 
 @app.route('/files/<file_id>/register/<report_type>', methods=['POST'])
 def register_report(file_id, report_type):
