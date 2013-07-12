@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>File Index</h1>
+<div class='row-fluid'>
+    {% for file in files %}
+        <div class='well well-small'><a href='/files/view/{{file}}'>{{file}}</a></div>
+    {% endfor %}
+</div>
+{% endblock %}
