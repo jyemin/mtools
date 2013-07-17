@@ -45,6 +45,7 @@ $(function() {
                     });
 
                     for (var j = 0; j < groups[i].points.length; j++) {
+                        console.log(groups[i].points[j])
                         series.addPoint({
                             x: groups[i].points[j][0],
                             y: groups[i].points[j][1],
@@ -105,10 +106,10 @@ $(function() {
     }
 
     var tooltipFormatter = function() {
+        console.log(this.point, this.point.op)
         var date = moment(this.x).format('ddd MMM D HH:mm:ss' + (this.x % 1000 != 0 ? '.SSS' : ''));
         var name = '<span style="color:' + this.series.color + '">' + this.series.name + '</span>';
-        var op = ops[this.point.op] || 'op';
-        return date + '<br/>' + name + ' ' + op + ': ' + this.y + 'ms';
+        return date + '<br/>' + name + ' ' + this.point.op + ': ' + this.y + 'ms';
      };
 
     var config = {
