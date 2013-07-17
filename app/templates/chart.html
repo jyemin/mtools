@@ -37,7 +37,7 @@ $(function() {
             function(report) {
                 groups = report.groups
                 console.log(groups)
-                for (var i = 2; i < groups.length; i++) {
+                for (var i = 0; i < groups.length; i++) {
                     var series = chart.addSeries({
                         name: groups[i].groupkey,
                         color: generateColor(),
